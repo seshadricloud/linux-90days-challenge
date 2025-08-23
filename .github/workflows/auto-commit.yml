@@ -1,0 +1,43 @@
+name: Auto Commit
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Make Changes
+        run: |
+          # Add your commands to make changes here
+          echo "Auto commit at $(date)" >> auto_commit_log.txt
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          git commit -m "Auto commit changes" || echo "No changes to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueComment = context.issue({ body: '🚨 Auto commit job failed. Please check the workflow logs for details.' });
+            await github.issues.createComment(issueComment);
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
