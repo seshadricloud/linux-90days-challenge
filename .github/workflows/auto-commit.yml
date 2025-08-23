@@ -2,11 +2,8 @@ name: Auto Commit
 
 on:
   schedule:
-    - cron: "*/20 * * * *"   # Runs every 20 minutes
-  workflow_dispatch:          # Lets you trigger manually from Actions tab
-
-permissions:
-  contents: write
+    - cron: "0 * * * *" # runs every hour
+  workflow_dispatch:     # allow manual trigger
 
 jobs:
   auto-commit:
@@ -19,6 +16,7 @@ jobs:
 
       - name: Make changes
         run: |
+          # Example: append timestamp to a log file
           date >> log.txt
 
       - name: Commit changes
@@ -29,4 +27,6 @@ jobs:
           git commit -m "Auto commit at $(date)" || echo "No changes to commit"
 
       - name: Push changes
-        run: git push
+        run: |
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
