@@ -3,7 +3,10 @@ name: Auto Commit
 on:
   schedule:
     - cron: "0 * * * *" # runs every hour
-  workflow_dispatch:     # allow manual trigger
+  workflow_dispatch:     # manual trigger
+
+permissions:
+  contents: write   # ✅ allow push to repo
 
 jobs:
   auto-commit:
@@ -16,7 +19,7 @@ jobs:
 
       - name: Make changes
         run: |
-          # Example: append timestamp to a log file
+          # Example: add timestamp
           date >> log.txt
 
       - name: Commit changes
